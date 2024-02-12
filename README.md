@@ -5,8 +5,8 @@ IDE is for dummy, and Atmel studio is really a bloatware. Instead of creating an
 The core is the toolchain that turns source code into machine code. ZFDxAVR_ideless 2.0 is a powerful script program that scans the whole project folder and sub-folder for valid source code, compiles them and then upload final executable and it works very well. Version 2.0 combines all my old scripts into one universal one, and most importantly it's been well commented that anyone with some competent should be able to modify the script easily without much knowledge on the ancient art of the batch programming language.
 
 + Alternative to IDE or more precisely to makefile 
-+ One click automatation script with extra options
-+ Scan working folder and Compile all .c .cpp .s .o files to .elf .lss .hex file
++ One click automation script with extra options
++ Scan working folder and Compile all .c .cpp .s .o files to .elf .lss .hex files
 + Fast, simple and works
 + Auto-upload via AVRdude
    
