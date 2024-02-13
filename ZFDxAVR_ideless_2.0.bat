@@ -33,21 +33,16 @@ set "linkEXTobject=yes"
 
 :: ######## --MCU Pick-- comment out to disable override ########
 :: atmega8 atmega88 atmega328p attiny13 atmega16 Atmega32 atmega128 Atmega169p
-   set "TargetMCU=atmega8"
+   set "TargetMCU=atmega16"
 
 ::**************************************************************************************
 :: yes or no -- choose to upload or not after compilation
-set "AUTOupload=no"
-:: Programmer ID: stk500 butterfly USBasp avr910
-set "Upload_PRO=USBasp"
+set "AUTOupload=yes"
 
-:: Not all Programmer supports Serial Upload
-set "Uploadserial=no"
+:: Programmer ID: butterfly USBasp avr910 -- Upload routine based on picked Upload_PRO
+set "Upload_PRO=butterfly"
 set "Upload_PORT=COM3"
-set "Upload_BAUD=500000"
-:: yes or no -- Send a DTR or RTS signal (only for upload via a bootloader)
-set "autoResetMCU=yes"
-
+set "Upload_BAUD=1000000"
 ::======================================================================================
 
 ::############################################################################
@@ -79,10 +74,9 @@ set "CompileOptions=%CompileOptions% %IncludePath%"
 title Advanced 8-bit AVR Compile and Upload Universal 2.0
 echo ===============================================================
 echo   Flyandance Advanced 8-bit AVR Compile and Upload UNI 2.0:
-
+echo ===============================================================
 :: ### MCU pick Override by TargetMCU ###
 if defined TargetMCU ( GOTO %TargetMCU% )
-echo ===============================================================
 echo.
 echo   1,Atmega8     4,Attiny13    7,Atmega128   
 echo   2,Atmega88    5,Atmega16    8,Atmega169p         
@@ -190,8 +184,11 @@ if !cppSource! GTR 0 set /a sourceTypecc+=1
 :: projectSource is the type of project going to be compiled
 if !cSource! GTR !cppSource! ( set "projectSource=c" )
 if !cppSource! GTR !cSource! ( set "projectSource=cplus" ) 
-if !sourceTypecc! GTR 1 ( set "Message=Error: Have only .c or .cpp files inside working directory, NOT both^! boo"
-goto END )
+if !cppSource! EQU 0 ( if !cSource! EQU 0 ( set "Message=Error: No Valid Source Found, boo^!"
+goto BOOZZ
+))
+if !sourceTypecc! GTR 1 ( set "Message=Error: Have only .c or .cpp files inside working folder, NOT both, boo^!"
+goto BOOZZ )
 
 :: number of source files
 set /a "Source_index=0"
@@ -200,7 +197,6 @@ set /a "Source_index=0"
 :: This is a c project
 ::==============================================
 if !projectSource! EQU c ( set "PickedCompiler=avr-gcc.exe"
-echo ===============================================================
 echo      ^<^< C Project:%Project_Name%   ^|^|   MCU:%Picked_MCU% ^>^>
 echo ---------------------------------------------------------------
 
@@ -222,7 +218,6 @@ echo !source_files!
 :: This is a cpp project
 ::==============================================
 if !projectSource! EQU cplus ( set "PickedCompiler=avr-g++.exe"
-echo ===============================================================
 echo     ^<^< C++ Project:%Project_Name%   ^|^|   MCU:%Picked_MCU% ^>^>
 echo ---------------------------------------------------------------
 FOR /f "delims=" %%f IN ('dir /b /s "*.cpp"') DO ( set "Obj_files=!Obj_files!"./Output/%%~nf.o" "
@@ -246,6 +241,7 @@ if %compileAssembly% EQU yes (
 :: number of source files
 set /a "asmSourceCC=0"
 
+if exist "*.s" (
 FOR /f "delims=" %%f IN ('dir /b /s "*.s"') DO ( set "Obj_files=!Obj_files!"./Output/%%~nf.o" "
 	set "ASMsource_files=!ASMsource_files!%%~nxf "
 	
@@ -255,7 +251,7 @@ FOR /f "delims=" %%f IN ('dir /b /s "*.s"') DO ( set "Obj_files=!Obj_files!"./Ou
 	set temp=!temp:%Main_Folder%=.!
 	set "SourceFilePathName[!Source_index!]=!temp!%%~nxf"
 	set "SourceFileOnlyName[!Source_index!]=%%~nf"
-  )
+))
   
 if !asmSourceCC! GTR 0 (
 echo ---------------------------------------------------------------
@@ -350,25 +346,50 @@ echo    %CD%\
 echo.
 
 if %AUTOupload% EQU no ( goto NO_Upload )
-GOTO UPLOAD
+GOTO Prepare_UPLOAD
 
 ::####################################################################################
 ::  Upload Stage
 ::####################################################################################
-:UPLOAD
 
-if %AUTOupload% EQU yes (
+::=============================
+:Prepare_UPLOAD
+::=============================
 
-if %Uploadserial% EQU yes ( set "UploadOPTIONS=-c %Upload_PRO% -b %Upload_BAUD% -P %Upload_PORT%" )
-if %Uploadserial% EQU no ( set "UploadOPTIONS=-c %Upload_PRO%" 
-set "autoResetMCU=no" )
+if %Upload_PRO% EQU avr910 GOTO PRO_avr910
+if %Upload_PRO% EQU butterfly GOTO PRO_butterfly
+if %Upload_PRO% EQU USBasp GOTO PRO_USBasp
 
-	if !autoResetMCU! EQU yes (
-	::Engage Serial, thus resetting the MCU, and force it into bootloader mode
-	mode %Upload_PORT% baud=%Upload_BAUD% parity=n data=8 rts=on dtr=on
-	)
+:PRO_avr910
+:: if this is avr910-FDxICSP, Use -x devcode=0x11; and turn Off auto-Reset-MCU BC it's a programmer
+set "UploadOPTIONS=-c %Upload_PRO% -b %Upload_BAUD% -P %Upload_PORT% -x devcode=0x11"
+set "autoResetMCU=no"
+GOTO UPLOAD_NOW
+
+:PRO_butterfly
+:: if this is avr109-FDxBoot, turn ON auto-Reset-MCU BC it's Bootloader
+set "UploadOPTIONS=-c %Upload_PRO% -b %Upload_BAUD% -P %Upload_PORT%"
+set "autoResetMCU=yes"
+GOTO UPLOAD_NOW
+
+:PRO_USBasp
+:: if this is USBasp, turn Off auto-Reset-MCU, and remove serial option; BC it's a USB programmer
+set "UploadOPTIONS=-c %Upload_PRO%"
+set "autoResetMCU=no"
+GOTO UPLOAD_NOW
+
+::=============================
+:UPLOAD_NOW
+::=============================
+
+if !autoResetMCU! EQU yes (
+::Engage Serial, thus resetting the MCU, and force it into bootloader mode
+mode %Upload_PORT% baud=%Upload_BAUD% parity=n data=8 rts=on dtr=on 1>NUL
+)
 
 :: uploading - If successful, go to END; or retry in about 5 seconds
+echo ***************************************************************
+echo ^>^>^>^>^>^>^>^>           Upload Via %Upload_PRO%           ^>^>^>^>^>^>^>^>
 echo ***************************************************************
 @"%Uploader%avrdude.exe" !UploadOPTIONS! -p %Upload_MCU% -U flash:w:"%Project_Name%.hex":i
 if %errorlevel% EQU  0 ( GOTO WELL_DONE )
@@ -377,7 +398,7 @@ if %errorlevel% GTR  0 ( GOTO RETRY_UPLOAD)
 
 :RETRY_UPLOAD
 timeout 5
-GOTO UPLOAD
+GOTO UPLOAD_NOW
 
 ::####################################################################################  !! 
 ::  Ending Stage
