@@ -1,4 +1,4 @@
-# IDElessAVR - Flyandance Advanced 8-bit AVR compile and Upload batch Program Universal
+## IDElessAVR - Flyandance Advanced 8-bit AVR compile and Upload batch Program Universal
 IDE is for dummy, and Atmel studio is really a bloatware. Instead of creating an alternative that probably would turn into bloatware, a no-string-attached, a no-IDE, an ideless approach has been invented.
 ![ZFDxAVR_ideless_2 0](https://github.com/flyandancexo/IDElessAVR/assets/66555404/ed9e68d8-c9b3-4804-a941-0166a898be85)
 
