@@ -10,7 +10,7 @@ The core is the toolchain that turns source code into machine code. ZFDxAVR_idel
 + Fast, simple and works
 + Auto-upload via AVRdude
    
-C is a simple yet extremely complicated programming language; Compiling a simple program is simple, but for advanced exploitations, you really need to dig in and hack the fout of the compiler. This script lets you type in more compilation options, and there are literally thousands of options, and GNU complier manual is 1111+ page long, thus this is absolutely not for dummies or for someone whom doesn't want to learn and be less dumber every day. 
+C is a simple yet extremely complicated programming language; Compiling a simple program is simple, but for advanced exploitation, you really need to dig in and hack the fout of the compiler. This script lets you type in more compilation options, and there are literally thousands of options, and GNU compiler manual is 1111+ page long, thus this is absolutely not for dummies or for someone whom doesn't want to learn and be less dumber every day. 
 
 To support the creation of more quality code, do donate whatever amount that you are comfortable with. I have worked so hard on this, and if hard works are not rewarded, who would work as hard?
 
