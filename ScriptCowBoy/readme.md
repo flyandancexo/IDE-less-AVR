@@ -1,1 +1,1 @@
-![C](https://github.com/flyandancexo/IDE-less-C-Cpp/assets/66555404/c4145ebb-655c-4506-b7d7-c1bde9cb4c06)
+![C](https://github.com/flyandancexo/IDE-less-AVR/assets/66555404/12f16cf6-6d1d-4f56-b37a-6932daf21355)
